@@ -13,8 +13,10 @@ import { setSingleCompany } from '@/redux/companySlice'
 const CompanyCreate = () => {
     const navigate = useNavigate();
     const [companyName, setCompanyName] = useState();
+    const [error, setError] = useState('');
     const dispatch = useDispatch();
     const registerNewCompany = async () => {
+        setError('');
         try {
             const res = await axios.post(`${COMPANY_API_END_POINT}/register`, {companyName}, {
                 headers:{
@@ -29,13 +31,15 @@ const CompanyCreate = () => {
                 navigate(`/admin/companies/${companyId}`);
             }
         } catch (error) {
-            console.log(error);
+            const errorMsg = error.response?.data?.message || 'Failed to register company';
+            setError(errorMsg);
+            toast.error(errorMsg);
         }
     }
     return (
         <div>
             <Navbar />
-            <div className='max-w-4xl mx-auto'>
+            <div className='max-w-4xl mx-auto pt-16'>
                 <div className='my-10'>
                     <h1 className='font-bold text-2xl'>Your Company Name</h1>
                     <p className='text-gray-500'>What would you like to give your company name? you can change this later.</p>
@@ -44,10 +48,14 @@ const CompanyCreate = () => {
                 <Label>Company Name</Label>
                 <Input
                     type="text"
-                    className="my-2"
+                    className={`my-2 rounded-xl ${error ? 'border-red-500' : ''}`}
                     placeholder="JobHunt, Microsoft etc."
-                    onChange={(e) => setCompanyName(e.target.value)}
+                    onChange={(e) => {
+                        setCompanyName(e.target.value);
+                        setError('');
+                    }}
                 />
+                {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
                 <div className='flex items-center gap-2 my-10'>
                     <Button variant="outline" onClick={() => navigate("/admin/companies")}>Cancel</Button>
                     <Button onClick={registerNewCompany}>Continue</Button>

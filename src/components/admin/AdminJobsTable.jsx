@@ -26,40 +26,55 @@ const AdminJobsTable = () => {
     return (
         <div>
             <Table>
-                <TableCaption>A list of your recent  posted jobs</TableCaption>
+                <TableCaption className="text-slate-500">A list of your recent posted jobs</TableCaption>
                 <TableHeader>
-                    <TableRow>
-                        <TableHead>Company Name</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
+                    <TableRow className="border-slate-200">
+                        <TableHead className="font-semibold text-slate-700">Company Name</TableHead>
+                        <TableHead className="font-semibold text-slate-700">Role</TableHead>
+                        <TableHead className="font-semibold text-slate-700">Date</TableHead>
+                        <TableHead className="text-right font-semibold text-slate-700">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
-                        filterJobs?.map((job) => (
-                            <tr>
-                                <TableCell>{job?.company?.name}</TableCell>
-                                <TableCell>{job?.title}</TableCell>
-                                <TableCell>{job?.createdAt.split("T")[0]}</TableCell>
-                                <TableCell className="text-right cursor-pointer">
-                                    <Popover>
-                                        <PopoverTrigger><MoreHorizontal /></PopoverTrigger>
-                                        <PopoverContent className="w-32">
-                                            <div onClick={()=> navigate(`/admin/companies/${job._id}`)} className='flex items-center gap-2 w-fit cursor-pointer'>
-                                                <Edit2 className='w-4' />
-                                                <span>Edit</span>
-                                            </div>
-                                            <div onClick={()=> navigate(`/admin/jobs/${job._id}/applicants`)} className='flex items-center w-fit gap-2 cursor-pointer mt-2'>
-                                                <Eye className='w-4'/>
-                                                <span>Applicants</span>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
+                        filterJobs?.length > 0 ? (
+                            filterJobs.map((job) => (
+                                <TableRow key={job._id} className="border-slate-200 hover:bg-slate-50">
+                                    <TableCell className="font-medium text-slate-900">{job?.company?.name}</TableCell>
+                                    <TableCell className="text-slate-700">{job?.title}</TableCell>
+                                    <TableCell className="text-slate-600">{job?.createdAt.split("T")[0]}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Popover>
+                                            <PopoverTrigger className="hover:bg-slate-100 p-2 rounded-lg transition-colors">
+                                                <MoreHorizontal size={18} className="text-slate-600" />
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-44 rounded-xl border-slate-200">
+                                                <div 
+                                                    onClick={() => navigate(`/admin/companies/${job._id}`)} 
+                                                    className='flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors'
+                                                >
+                                                    <Edit2 className='w-4 text-slate-600' />
+                                                    <span className="text-sm font-medium text-slate-700">Edit</span>
+                                                </div>
+                                                <div 
+                                                    onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)} 
+                                                    className='flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors mt-1'
+                                                >
+                                                    <Eye className='w-4 text-slate-600' />
+                                                    <span className="text-sm font-medium text-slate-700">Applicants</span>
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                                    No jobs found
                                 </TableCell>
-                            </tr>
-
-                        ))
+                            </TableRow>
+                        )
                     }
                 </TableBody>
             </Table>

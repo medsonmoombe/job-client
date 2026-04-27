@@ -23,10 +23,14 @@ const CompanySetup = () => {
     });
     const {singleCompany} = useSelector(store=>store.company);
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
     const navigate = useNavigate();
 
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
+        if (errors[e.target.name]) {
+            setErrors({ ...errors, [e.target.name]: undefined });
+        }
     }
 
     const changeFileHandler = (e) => {
@@ -36,6 +40,7 @@ const CompanySetup = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
+        setErrors({});
         const formData = new FormData();
         formData.append("name", input.name);
         formData.append("description", input.description);
@@ -57,8 +62,18 @@ const CompanySetup = () => {
                 navigate("/admin/companies");
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.message);
+            if (error.response?.data?.errors) {
+                const validationErrors = {};
+                error.response.data.errors.forEach(err => {
+                    if (!validationErrors[err.field]) {
+                        validationErrors[err.field] = err.message;
+                    }
+                });
+                setErrors(validationErrors);
+                toast.error('Please fix the validation errors');
+            } else {
+                toast.error(error.response?.data?.message || 'Failed to update company');
+            }
         } finally {
             setLoading(false);
         }
@@ -75,69 +90,101 @@ const CompanySetup = () => {
     },[singleCompany]);
 
     return (
-        <div>
+        <div className="min-h-screen bg-slate-50">
             <Navbar />
-            <div className='max-w-xl mx-auto my-10'>
+            <div className='max-w-3xl mx-auto my-10 pt-24 px-6'>
                 <form onSubmit={submitHandler}>
-                    <div className='flex items-center gap-5 p-8'>
-                        <Button onClick={() => navigate("/admin/companies")} variant="outline" className="flex items-center gap-2 text-gray-500 font-semibold">
-                            <ArrowLeft />
+                    <div className='flex items-center gap-5 mb-8'>
+                        <Button 
+                            type="button"
+                            onClick={() => navigate("/admin/companies")} 
+                            variant="outline" 
+                            className="flex items-center gap-2 rounded-xl"
+                        >
+                            <ArrowLeft size={18} />
                             <span>Back</span>
                         </Button>
-                        <h1 className='font-bold text-xl'>Company Setup</h1>
+                        <h1 className='font-bold text-2xl text-slate-900'>Company Setup</h1>
                     </div>
-                    <div className='grid grid-cols-2 gap-4'>
-                        <div>
-                            <Label>Company Name</Label>
-                            <Input
-                                type="text"
-                                name="name"
-                                value={input.name}
-                                onChange={changeEventHandler}
-                            />
+                    
+                    <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                            <div>
+                                <Label className="text-sm font-semibold text-slate-700 mb-2 block">Company Name</Label>
+                                <Input
+                                    type="text"
+                                    name="name"
+                                    value={input.name}
+                                    onChange={changeEventHandler}
+                                    placeholder="Tech Corp"
+                                    className={`rounded-xl ${errors.name ? 'border-red-500' : ''}`}
+                                />
+                                {errors.name && <p className="text-red-600 text-xs mt-1">{errors.name}</p>}
+                            </div>
+                            <div>
+                                <Label className="text-sm font-semibold text-slate-700 mb-2 block">Website</Label>
+                                <Input
+                                    type="text"
+                                    name="website"
+                                    value={input.website}
+                                    onChange={changeEventHandler}
+                                    placeholder="https://company.com"
+                                    className={`rounded-xl ${errors.website ? 'border-red-500' : ''}`}
+                                />
+                                {errors.website && <p className="text-red-600 text-xs mt-1">{errors.website}</p>}
+                            </div>
+                            <div>
+                                <Label className="text-sm font-semibold text-slate-700 mb-2 block">Location</Label>
+                                <Input
+                                    type="text"
+                                    name="location"
+                                    value={input.location}
+                                    onChange={changeEventHandler}
+                                    placeholder="Lusaka, Zambia"
+                                    className={`rounded-xl ${errors.location ? 'border-red-500' : ''}`}
+                                />
+                                {errors.location && <p className="text-red-600 text-xs mt-1">{errors.location}</p>}
+                            </div>
+                            <div>
+                                <Label className="text-sm font-semibold text-slate-700 mb-2 block">Company Logo</Label>
+                                <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={changeFileHandler}
+                                    className="rounded-xl"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <Label className="text-sm font-semibold text-slate-700 mb-2 block">Description</Label>
+                                <textarea
+                                    name="description"
+                                    value={input.description}
+                                    onChange={changeEventHandler}
+                                    placeholder="Tell us about your company..."
+                                    rows={4}
+                                    className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.description ? 'border-red-500' : 'border-slate-200'}`}
+                                />
+                                {errors.description && <p className="text-red-600 text-xs mt-1">{errors.description}</p>}
+                            </div>
                         </div>
-                        <div>
-                            <Label>Description</Label>
-                            <Input
-                                type="text"
-                                name="description"
-                                value={input.description}
-                                onChange={changeEventHandler}
-                            />
-                        </div>
-                        <div>
-                            <Label>Website</Label>
-                            <Input
-                                type="text"
-                                name="website"
-                                value={input.website}
-                                onChange={changeEventHandler}
-                            />
-                        </div>
-                        <div>
-                            <Label>Location</Label>
-                            <Input
-                                type="text"
-                                name="location"
-                                value={input.location}
-                                onChange={changeEventHandler}
-                            />
-                        </div>
-                        <div>
-                            <Label>Logo</Label>
-                            <Input
-                                type="file"
-                                accept="image/*"
-                                onChange={changeFileHandler}
-                            />
-                        </div>
+                        
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full mt-6 h-11 rounded-xl btn-gradient text-white"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                    Updating...
+                                </>
+                            ) : (
+                                'Update Company'
+                            )}
+                        </Button>
                     </div>
-                    {
-                        loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Update</Button>
-                    }
                 </form>
             </div>
-
         </div>
     )
 }
